@@ -36,7 +36,7 @@ const Notes = () => {
     });
 
     return usubscribe;
-  }, []);
+  }, [user]);
 
   const deleteNote = async (id: string) => {
     const noteRef = doc(db, 'users', user!.uid, 'notes', id);
