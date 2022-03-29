@@ -1,14 +1,9 @@
-import { useLayoutEffect, useRef, useState } from 'react';
-import {
-  collection,
-  doc,
-  addDoc,
-  deleteDoc,
-  Timestamp,
-} from 'firebase/firestore';
+import { useRef, useState } from 'react';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { RiSendPlaneFill } from 'react-icons/ri';
 
 import { db } from 'services/firebase.service';
+import { useAuthContext } from 'utils/contexts/auth.context';
 import { getFormattedDate } from 'utils/helpers/date.helper';
 import INote from 'types/Note';
 
@@ -16,6 +11,7 @@ const TITLE_LEN_LIMIT = 16;
 const BODY_LEN_LIMIT = 60;
 
 const AddNote = () => {
+  const { user } = useAuthContext();
   const [noteData, setNoteData] = useState({
     title: '',
     body: '',
@@ -50,7 +46,7 @@ const AddNote = () => {
     if (titleField.current) {
       titleField.current.focus();
     }
-    const notesCollectionRef = collection(db, 'notes');
+    const notesCollectionRef = collection(db, 'users', user!.uid, 'notes');
 
     await addDoc(notesCollectionRef, {
       ...noteData,

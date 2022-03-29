@@ -11,14 +11,17 @@ import {
 } from 'firebase/firestore';
 
 import { db } from 'services/firebase.service';
-import { AddNote, StickyNote } from '.';
+import { useAuthContext } from 'utils/contexts/auth.context';
+import { AddNote, StickyNote } from 'components/Notes';
 import INote from 'types/Note';
 
 const Notes = () => {
+  const { user } = useAuthContext();
   const [notes, setNotes] = useState<INote[] | null>(null);
 
   useEffect(() => {
-    const notesCollectionRef = collection(db, 'notes');
+    const notesCollectionRef = collection(db, 'users', user!.uid, 'notes');
+
     const orderedNotesQuery = query(
       notesCollectionRef,
       orderBy('createdAt', 'desc')
@@ -36,13 +39,13 @@ const Notes = () => {
   }, []);
 
   const deleteNote = async (id: string) => {
-    const noteRef = doc(db, 'notes', id);
+    const noteRef = doc(db, 'users', user!.uid, 'notes', id);
 
     await deleteDoc(noteRef);
   };
 
   const saveNote = async (id: string) => {
-    const noteRef = doc(db, 'notes', id);
+    const noteRef = doc(db, 'users', user!.uid, 'notes', id);
     const noteSnap = await getDoc(noteRef);
 
     const note = noteSnap.data() as INote;
@@ -51,27 +54,28 @@ const Notes = () => {
   };
 
   return (
-    <section>
-      <div className="flex items-center mb-7">
-        <h1 className="text-3xl">Notes</h1>
-        <img src="./logo.svg" alt="" className="w-16 mt-2" />
-      </div>
-
+    <section className="py-5 md:py-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <AddNote />
 
-        {notes?.map((note) => (
-          <StickyNote
-            key={note.id}
-            id={note.id}
-            title={note.title}
-            body={note.body}
-            saved={note.saved}
-            createdAt={note.createdAt}
-            handleDelete={deleteNote}
-            handleSave={saveNote}
-          />
-        ))}
+        {!notes ? (
+          <p className="fixed z-10 top-2/4 left-2/4 text-4xl translate-y-[-50%] translate-x-[-50%] sm:text-5xl">
+            Loading...
+          </p>
+        ) : (
+          notes?.map((note) => (
+            <StickyNote
+              key={note.id}
+              id={note.id}
+              title={note.title}
+              body={note.body}
+              saved={note.saved}
+              createdAt={note.createdAt}
+              handleDelete={deleteNote}
+              handleSave={saveNote}
+            />
+          ))
+        )}
       </div>
     </section>
   );

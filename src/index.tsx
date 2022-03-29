@@ -1,14 +1,19 @@
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import App from 'App';
-import store from 'store/rootReducer';
+import AuthContextProvider from 'utils/contexts/auth.context';
 
 import 'index.css';
+import ToastsContextProvider from 'utils/contexts/toasts.context';
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <AuthContextProvider>
+    <ToastsContextProvider>
+      <Router>
+        <App />
+      </Router>
+    </ToastsContextProvider>
+  </AuthContextProvider>,
   document.getElementById('root')
 );
